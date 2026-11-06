@@ -291,7 +291,16 @@ function stepHead(dt){
   head.a+=turn*TURN*dt;
   const v=speed();
   head.x+=Math.cos(head.a)*v*dt;head.y+=Math.sin(head.a)*v*dt;
+  bounceWalls();
   if(dist(head,path[0]||head)>=REC)path.unshift({x:head.x,y:head.y});
+}
+function bounceWalls(){
+  const u=HEAD_DRAW/256,left=DAX*u,right=(DU-DAX)*u,top=DAY*u,bot=(DU-DAY)*u;
+  const minX=WALL+left,maxX=W-WALL-right,minY=WALL+top,maxY=W-WALL-bot;
+  if(head.x<minX){head.x=minX;if(Math.cos(head.a)<0)head.a=Math.PI-head.a}
+  else if(head.x>maxX){head.x=maxX;if(Math.cos(head.a)>0)head.a=Math.PI-head.a}
+  if(head.y<minY){head.y=minY;if(Math.sin(head.a)<0)head.a=-head.a}
+  else if(head.y>maxY){head.y=maxY;if(Math.sin(head.a)>0)head.a=-head.a}
 }
 function stepPul(dt){
   pul.av=clamp(pul.av+rnd(-1,1)*8*dt,-1.6,1.6);
@@ -307,7 +316,6 @@ function stepPul(dt){
 function collide(now){
   // Doroshi sprite AABB: walls + toy pickup (character touch)
   const u=HEAD_DRAW/256,L=head.x-DAX*u,R=head.x+(DU-DAX)*u,T=head.y-DAY*u,B=head.y+(DU-DAY)*u;
-  if(L<WALL||T<WALL||R>W-WALL||B>W-WALL)return over();
   for(let k=SKIP;k<segs.length;k++)if(dist(head,segs[k])<HR+TT-8)return over();
   {const cx=clamp(food.x,L,R),cy=clamp(food.y,T,B);
    if(Math.hypot(food.x-cx,food.y-cy)<TR){toys.push(food.e);ensurePath();updateSegs();newFood();updHud();DoraAudio.pickup()}}
